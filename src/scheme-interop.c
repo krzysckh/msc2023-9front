@@ -1062,7 +1062,7 @@ static pointer scm_get_bounceable(scheme *sc, pointer args)
     } break;
     default: {
       abort();
-      warnx("%s: %d not implemented for get-bounceable", __func__, cur->t);
+      warnx("%s: %d not implemented for get-bounceable", "", cur->t);
     }
     }
   } else {

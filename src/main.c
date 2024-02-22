@@ -98,11 +98,12 @@ bool collision_point_poly(Vector2 point, Vector2 *points, int pointCount)
   return inside;
 }
 
-// via ./notatki.ora
 Vector2 create_target(Vector2 a, float angle)
 {
   const int H = GetScreenHeight();
 
+  // a u mnie dziala
+  if (angle == 90.f) angle = 90.5;
   if ((angle > 180 && angle <= 360) || angle == 0)
     return (Vector2){(ctg((180-angle)*(PI/180.f))*a.y+a.x), 0};
   else
