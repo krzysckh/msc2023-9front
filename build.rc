@@ -1,0 +1,63 @@
+#!/bin/rc
+
+CC=6c
+LD=6l
+
+fn scm2c {
+  f2c $1 > $2
+}
+
+fn create-load-compiled-scripts {
+  rm  -f .seen
+  touch .seen
+  lst=`{echo tinyscheme/r5rs.scm scm/colors.scm scm/util.scm scm/interop-helpers.scm scm/system-hooks.scm scm/*.scm}
+  renamed=`{echo $lst | sed 's/\.|_|-|\//_/g'}
+  for (name in $renamed) {
+    if (! grep $name .seen > /dev/null) {
+      echo $name >> .seen
+    }
+  }
+  echo '#include "optyka.h"
+extern scheme scm;
+
+void load_compiled_scripts(void) {'
+  for (f in `{cat .seen}) {
+    echo 'extern char ' $f '[];'
+    echo 'scheme_load_string(&scm, ' $f ');'
+    echo 'TraceLog(LOG_INFO, "loaded builtin ' $f '");'
+  }
+
+  echo '}'
+}
+
+fn makescm {
+  for (i in (scm/*.scm tinyscheme/r5rs.scm)) {
+    echo scm2c $i...
+    scm2c $i $i.c
+    pcc -o $i.o -c $i.c
+  }
+}
+
+echo build 9/f2c.c...
+$CC -o 9/f2c.o 9/f2c.c
+$LD -o f2c 9/f2c.o
+
+cd tinyscheme
+build.rc
+cd ..
+
+makescm
+xxd --include proggy.otf > proggy.c
+
+echo create-load-compiled-scripts...
+create-load-compiled-scripts > load-compiled-scripts.c
+
+for (cf in src/*.c 9/9.c 9/rshapes.c load-compiled-scripts.c proggy.c 9/99.c) {
+  echo build $cf.o
+  if (! pcc -DDRAW_LINES_INSIDE -DRCFILE -D_PLAN9_SOURCE -c -o $cf.o -I9 -DPLAN9 -I. -Isrc $cf) {
+    exit 1
+  }
+}
+
+echo link
+pcc -o lambda-optyka-plan9 9/99.c.o proggy.c.o tinyscheme/r5rs.scm.o scm/*.o load-compiled-scripts.c.o tinyscheme/scheme.o 9/rshapes.c.o src/*.o 9/9.c.o -l9 -lbsd -ldraw

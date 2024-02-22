@@ -1,0 +1,9 @@
+#!/bin/rc
+
+rm -f *.o
+rm -f 9/*.o
+rm -f tinyscheme/*.o
+rm -f scm/*.o
+rm -f src/*.o
+rm -f proggy.c
+rm -f f2c

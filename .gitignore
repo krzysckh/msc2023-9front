@@ -11,7 +11,6 @@ doc/*.html
 doc/*.pdf
 doc/scheme*.md
 *.res
-*.rc
 *.ico
 TAGS
 *.tgz

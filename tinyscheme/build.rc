@@ -1,0 +1,4 @@
+#!/bin/rc
+
+echo build scheme.o
+pcc '-DUSE_MATH=1' '-DUSE_ASCII_NAMES=0' '-DUSE_DL=1' '-DSUN_DL=1' -DPLAN9 -I../9 -c scheme.c -o scheme.o 
