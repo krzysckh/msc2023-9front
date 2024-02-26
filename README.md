@@ -10,4 +10,4 @@
 ![](s2.png)
 ![](s3.png)
 
-<video controls width="640" height="400" src="https://git.krzysckh.org/kpm/msc9/raw/branch/master/99999.mp4" type="video/mp4" />
+<video controls width="640" height="400" src="https://github.com/krzysckh/msc2023-9front/assets/76700379/1b9c6a03-4076-4e4c-a293-5a8f9666dd67" type="video/mp4" />
