@@ -130,12 +130,17 @@ new_bgcolor(uint32_t c)
 void
 ClearBackground(uint32_t color)
 {
-  if (color == color2color(winconf.bgcolor))
+  //printf("%ld\n", color);
+  Image *tmp = allocimage(display, Rect(0, 0, 1, 1), RGB24, 1, color);
+  draw(screen, screen->r, tmp, nil, ZP);
+/*
+  if (color == winconf.bgcolor)
     draw(screen, screen->r, bg, nil, ZP);
   else {
     new_bgcolor(color);
     ClearBackground(color);
   }
+*/
 }
 
 void
@@ -158,7 +163,7 @@ void
 DrawLineEx(rlVector2 p1, rlVector2 p2, float thick, uint32_t color)
 {
   Image *tmp_img = allocimage(display, Rect(0, 0, 1, 1), RGB24, 1, color2color(color));
-  line(screen, Pt(p1.x+xr, p1.y+yr), Pt(p2.x+xr, p2.y+yr), 0, 0, thick, tmp_img, ZP);
+  line(screen, Pt(p1.x+xr, p1.y+yr), Pt(p2.x+xr, p2.y+yr), 0, 0, thick-0.8, tmp_img, ZP);
 }
 
 void

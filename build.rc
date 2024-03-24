@@ -47,17 +47,16 @@ build.rc
 cd ..
 
 makescm
-xxd --include proggy.otf > proggy.c
 
 echo create-load-compiled-scripts...
 create-load-compiled-scripts > load-compiled-scripts.c
 
-for (cf in src/*.c 9/9.c 9/rshapes.c load-compiled-scripts.c proggy.c 9/99.c) {
+for (cf in src/*.c 9/9.c 9/rshapes.c load-compiled-scripts.c 9/99.c) {
   echo build $cf.o
-  if (! pcc -DDRAW_LINES_INSIDE -DRCFILE -D_PLAN9_SOURCE -c -o $cf.o -I9 -DPLAN9 -I. -Isrc $cf) {
+  if (! pcc -DDRAW_LINES_INSIDE -DRCFILE -D_PLAN9_SOURCE -D_POSIX_SOURCE -c -o $cf.o -I9 -DPLAN9 -I. -Isrc $cf) {
     exit 1
   }
 }
 
 echo link
-pcc -o lambda-optyka-plan9 9/99.c.o proggy.c.o tinyscheme/r5rs.scm.o scm/*.o load-compiled-scripts.c.o tinyscheme/scheme.o 9/rshapes.c.o src/*.o 9/9.c.o -l9 -lbsd -ldraw
+pcc -o lambda-optyka-plan9 9/99.c.o tinyscheme/r5rs.scm.o scm/*.o load-compiled-scripts.c.o tinyscheme/scheme.o 9/rshapes.c.o src/*.o 9/9.c.o -l9 -lbsd -ldraw

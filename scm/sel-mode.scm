@@ -136,6 +136,13 @@
                                            (- maxy miny)))))
              (_ (update-bounding-rect))
              (b-rect-id (add-hook 'frame (→ (gui/rect bounding-rect (aq 'red *colorscheme*)))))
+             (delete-handler-id
+              (add-hook
+               'keypress
+               (→2 (when (and (not sel-mode:menu-open) (not sel-mode:wait-a-sec) (eqv? y 261))
+                     (for-each delete-bounceable sel-mode:selected-bounceable-ids)
+                     (delete-sources sel-mode:selected-source-ids)
+                     (end-selected-mode)))))
              (cursor-handler-id
               (add-hook
                'frame
@@ -188,6 +195,7 @@
                  (delete-hook 'click move-handler-id)
                  (delete-hook 'click menu-handler-id)
                  (delete-hook 'click close-handler-id)
+                 (delete-hook 'keypress delete-handler-id)
                  (really-end-selected-mode)))
              (close-handler-id
               (add-hook

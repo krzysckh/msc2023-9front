@@ -8,26 +8,20 @@
 #include <stdlib.h>
 #include <math.h>
 #include <limits.h>
+#include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
-
-#ifndef PLAN9
-#include <unistd.h>
-char *argv0;
-#endif
-
-#define DEBUG 0
-#undef DEBUG
 
 extern bool scheme_is_initialized;
 extern scheme scm;
 extern hookable_event_t keypress, click, unclick, frame, clocke, loge, resize, filesdropped;
 
-#define MAX_INPUT_BUFFER_SIZE 4096
-/* static void (*input_func)(void) = NULL; */
-/* static char input_buffer[MAX_INPUT_BUFFER_SIZE] = {0}; */
-
 Font fontset[MAX_FONT_SIZE] = {0};
+
+Bounceables bounceables = {0};
+Sources sources = {0};
+
+bool dont_tracelog = false;
 
 /* to jest nieco niespójne ze scheme podejście, ale co klatkę wykonywane jest
    ClearBackground(), i robienie tego w scheme było by po prostu zbyt powolne */
@@ -41,18 +35,13 @@ void init_winconf(void)
   winconf.lens_outline_color  = (Color){ 0xdb, 0xbc, 0x7f, 0xff };
   winconf.lens_center_color   = (Color){ 0x9d, 0xa9, 0xa0, 0xaa };
   winconf.lens_focal_pt_color = (Color){ 0xe6, 0x98, 0x75, 0xff };
-  winconf.source_color        = (Color){ 0xff, 0x00, 0xff, 0xff };
+  winconf.source_color        = (Color){ 0x38, 0x4b, 0x55, 0xff };
 }
 
-#define MIRROR_THICKNESS 1
-
-Bounceables bounceables = {0};
-Sources sources = {0};
-
-bool dont_tracelog = false;
 
 Font get_font_with_size(int size)
 {
+/*
   extern unsigned int proggy_otf_len;
   extern unsigned char proggy_otf[];
 
@@ -63,6 +52,9 @@ Font get_font_with_size(int size)
   }
 
   return fontset[size];
+*/
+  Font f = {0, 0, 0};
+  return f;
 }
 
 Color dim_color(Color c, int alpha)
@@ -70,6 +62,11 @@ Color dim_color(Color c, int alpha)
   return (Color){c.r, c.g, c.b, alpha};
 }
 
+// ta funkcja jest potrzebna, bo (to w sumie ciekawe)
+// - w jednym pliku .c nie mogę mieć na raz winuser.h i raylib.h (bo ze sobą kolidują nazwami)
+// - nie chcę deklarować samemu funkcji z winuser.h
+// - nie chcę żeby kompilator na mnie krzyczał
+// - src/win-icon.c
 void *rl_get_window_handle(void)
 {
   return GetWindowHandle();
@@ -84,7 +81,7 @@ float normalize_angle(float f)
 }
 
 // bo CheckCollisionPointPoly z raylib 4.5 nie działa poprawnie
-// naprawione w raylib 5, C-c C-v tutaj
+// naprawione w raylib 5, `V}y, C-x b main.c RET, p` tutaj
 bool collision_point_poly(Vector2 point, Vector2 *points, int pointCount)
 {
   bool inside = false;
@@ -98,11 +95,11 @@ bool collision_point_poly(Vector2 point, Vector2 *points, int pointCount)
   return inside;
 }
 
+// via ./notatki.ora
 Vector2 create_target(Vector2 a, float angle)
 {
   const int H = GetScreenHeight();
 
-  // a u mnie dziala
   if (angle == 90.f) angle = 90.5;
   if ((angle > 180 && angle <= 360) || angle == 0)
     return (Vector2){(ctg((180-angle)*(PI/180.f))*a.y+a.x), 0};
@@ -114,7 +111,7 @@ static void draw_mirror(bounceable_t *b)
 {
   Vector2 p1 = b->data.mirror->p1,
           p2 = b->data.mirror->p2;
-  DrawLineEx(p1, p2, MIRROR_THICKNESS, winconf.mirror_color);
+  DrawLineEx(p1, p2, 1, winconf.mirror_color);
 }
 
 static void draw_all_bounceables(void)
@@ -268,18 +265,33 @@ void _draw_single_light(source_t *source, Vector2 start, Vector2 s_target, int m
   }
 }
 
+static source_t *tmp_src = NULL;
 void draw_light(source_t *src)
 {
-  int i, dist = floor(src->size / (1.f+(float)src->n_beam));
-  for (i = 1; i <= src->n_beam; ++i) {
+  if (!tmp_src)
+    tmp_src = malloc(sizeof(source_t));
+
+  memcpy(tmp_src, src, sizeof(source_t));
+
+  if (is_white(tmp_src->color)) {
+    tmp_src->n_beam = 1;
+    tmp_src->thickness = src->n_beam;
+  } else {
+    tmp_src->n_beam = src->n_beam;
+    tmp_src->thickness = 1;
+  }
+
+  int i, dist = floor(src->size / (1.f+(float)tmp_src->n_beam));
+
+  for (i = 1; i <= tmp_src->n_beam; ++i) {
     /* int sz = ((float)src->size/2)/sqrt(2); */
     int sz = (((float)src->size/2)-(i*dist))/sqrt(2);
     Vector2 rot = Vector2Rotate(vec(sz, sz), (-45 - 90 + src->angle) * PI/180);
     Vector2 pt = vec(src->pt.x + rot.x, src->pt.y + rot.y);
     // witam nazywam sie krzysztof, a te wzory wyciagnalem prosto z dupy
 
-    draw_single_light(src, pt, vec(src->target.x - (src->pt.x - pt.x),
-                                   src->target.y - (src->pt.y - pt.y)));
+    draw_single_light(tmp_src, pt, vec(src->target.x - (src->pt.x - pt.x),
+                                       src->target.y - (src->pt.y - pt.y)));
   }
 }
 
@@ -302,6 +314,8 @@ void add_bounceable(bounceable_type_t t, void *data)
   b->t = t;
   b->data.p = data;
   b->removed = 0;
+
+  fprintf(stderr, "(not tracelogged) adding new bounceable T: %d\n", t);
 
   dyn_add_ptr_sized((&bounceables), (*b), sizeof(bounceable_t));
 }
@@ -363,6 +377,7 @@ static const char *rl_tracelog_tokens[] = {
   "UP", "VAO", "VBO", "WAVE", "WINDOW",
 };
 
+// ta funkcja jest po to, żeby tracelog (gdy -DPROD) nie pokazywał wiadomości od raylib
 static bool is_raylib_message(char *s)
 {
 #ifdef PROD
@@ -404,8 +419,6 @@ int main(int argc, char **argv)
 #endif // _WIN32
 {
   extern scheme scm;
-  extern char *argv0;
-  argv0 = strdup(*argv);
   int i, c, k, charsize, opt;
   time_t time_prev, time_cur;
   struct mouse_information_t mi = {
@@ -415,12 +428,13 @@ int main(int argc, char **argv)
     .left = false,
     .right = false,
   };
+
   init_winconf();
 
   SetTraceLogCallback(tracelog_cb);
-#if !defined(_WIN32) && !defined(PLAN9)
-  while ((opt = getopt(argc, argv, "e:F:")) != -1) {
-    switch (opt) {
+#ifndef _WIN32
+/* TODO: args
+  ARGBEGIN {
     case 'e':
       initialize_scheme();
       scheme_load_string(&scm, optarg);
@@ -435,9 +449,9 @@ int main(int argc, char **argv)
       scheme_load_file(&scm, f);
       exit(0);
       break;
-    }
-  }
-#endif
+  } ARGEND;
+*/
+#endif // _WIN32
 
   // TODO: idk czy resizable + bardzo duzo nowego scheme
   // czy Camera2D + [wasd] + malo nowego kodu
@@ -472,7 +486,7 @@ int main(int argc, char **argv)
     {
       ClearBackground(winconf.bgcolor);
 
-      c = GetCharPressed();
+      c = CodepointToUTF8(GetCharPressed(), &charsize)[0];
       k = GetKeyPressed();
       if (c || k)
         do_hooks(&keypress, cons(&scm, mk_character(&scm, c),
@@ -536,10 +550,8 @@ int main(int argc, char **argv)
     mi.first_click = false;
   }
 
-  if (sources.v)
-    free(sources.v);
-  if (bounceables.v)
-    free(bounceables.v);
+  free(sources.v);
+  free(bounceables.v);
   scheme_deinit(&scm);
 
   return 0;

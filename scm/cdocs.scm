@@ -1,4 +1,5 @@
-;; tu jest dokumentacja funkcji zdefiniowanych w src/scheme-interop.c
+;;---- cdocs.scm
+;; tu jest dokumentacja i sygnatury funkcji zdefiniowanych w src/scheme-interop.c
 
 (document-function
  (time-since-init)
@@ -137,3 +138,19 @@
 (document-function
  (delete-bounceable id)
  nil)
+
+(document-function
+ (set-lens! id center d r)
+ nil)
+
+(document-function
+ (point-in-lens? pt lens-id)
+ nil)
+
+(document-function
+ (white? color)
+ "sprawdza czy kolor jest rozumiany za biały")
+
+(document-function
+ (getenv s)
+ "`man 3 getenv`")

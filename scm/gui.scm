@@ -382,7 +382,7 @@ zwraca **destruktor** - funkcję usuwającą go"
 
   (set! *current-mode* 'new-source)
 
-  (define n-beams 1)
+  (define nb-or-thickness 1)
   (define mouse-reactive #f)
   (define angle 0)
 
@@ -390,7 +390,6 @@ zwraca **destruktor** - funkcję usuwającą go"
   (define color-r (list-ref default-light 0))
   (define color-g (list-ref default-light 1))
   (define color-b (list-ref default-light 2))
-  (define thickness 1)
 
   (define color-a 255)
 
@@ -408,16 +407,17 @@ zwraca **destruktor** - funkcję usuwającą go"
                                  (+ 10 (cadr rect))
                                  128
                                  32)
-                           1 20 (→1 (set! n-beams (round x)))))
+                           1 20 (→1 (set! nb-or-thickness x))))
          (d-n-beam-label
           (let ((id (add-hook
                     'frame
-                    (→
-                     (gui/draw-text
-                      (string-append "ilość wiązek: " (number->string n-beams))
-                      (cons (+ 10 (car rect) 128 10)
-                            (+ 10 (cadr rect) (/ (cdr (measure-text "A" 16)) 2)))
-                      16 (aq 'font *colorscheme*))))))
+                    (→ (gui/draw-text
+                        (string-append (if (white? (list color-r color-g color-b))
+                                           "szerokość wiązki (światło białe): " "ilość wiązek: ")
+                                       (number->string nb-or-thickness))
+                        (cons (+ 10 (car rect) 128 10)
+                              (+ 10 (cadr rect) (/ (cdr (measure-text "A" 16)) 2)))
+                        16 (aq 'font *colorscheme*))))))
             (→ (delete-hook 'frame id))))
          (_1-line-height (+ 10 (cadr rect) 32))
 
@@ -485,23 +485,23 @@ zwraca **destruktor** - funkcję usuwającą go"
                                                    (list color-r color-g color-b color-a))))))
             (→ (delete-hook 'frame id))))
 
-         (_5-line-height (+ 32 10 _4-line-height 32))
+         ;; (_5-line-height (+ 32 10 _4-line-height 32))
 
-         (d-thickness-slider (gui/slider
-                              (list (+ 10 (car rect))
-                                    (+ 10 _5-line-height)
-                                    128
-                                    32)
-                              1 10 (→1 (set! thickness (round x)))))
-         (d-thickness-label
-          (let ((id (add-hook
-                    'frame
-                    (→ (gui/draw-text
-                        (string-append "szerokość wiązki (tylko przy kolorze białym): " (number->string thickness))
-                        (cons (+ 10 (car rect) 128 10)
-                              (+ 10 _5-line-height (/ (cdr (measure-text "A" 16)) 2)))
-                        16 (aq 'font *colorscheme*))))))
-            (→ (delete-hook 'frame id))))
+         ;; (d-thickness-slider (gui/slider
+         ;;                      (list (+ 10 (car rect))
+         ;;                            (+ 10 _5-line-height)
+         ;;                            128
+         ;;                            32)
+         ;;                      1 10 (→1 (set! thickness (round x)))))
+         ;; (d-thickness-label
+         ;;  (let ((id (add-hook
+         ;;            'frame
+         ;;            (→ (gui/draw-text
+         ;;                (string-append "szerokość wiązki (tylko przy kolorze białym): " (number->string thickness))
+         ;;                (cons (+ 10 (car rect) 128 10)
+         ;;                      (+ 10 _5-line-height (/ (cdr (measure-text "A" 16)) 2)))
+         ;;                16 (aq 'font *colorscheme*))))))
+         ;;    (→ (delete-hook 'frame id))))
 
 
          ;; końcowy przycisk "ok"
@@ -509,18 +509,14 @@ zwraca **destruktor** - funkcję usuwającą go"
                                        (- *SCREEN-HEIGHT* 80))
                                  "Ok"
                                  (→ (create-source
-                                   `((n-beams . ,n-beams)
-                                     (reactive . ,mouse-reactive)
-                                     (angle . ,angle)
-                                     (pos . ,gui/new-source-form:pos)
-                                     (thickness . ,(if (all (→1 (eqv? x 255))
-                                                            (list color-r color-g color-b))
-                                                       thickness
-                                                       1))
-                                     (color . ,(list color-r
-                                                     color-g
-                                                     color-b
-                                                     color-a))))
+                                     `((n-beams . ,nb-or-thickness)
+                                       (reactive . ,mouse-reactive)
+                                       (angle . ,angle)
+                                       (pos . ,gui/new-source-form:pos)
+                                       (color . ,(list color-r
+                                                       color-g
+                                                       color-b
+                                                       color-a))))
 
 
                                   ;; cleanup gui
@@ -540,9 +536,6 @@ zwraca **destruktor** - funkcję usuwającą go"
                                   (d-b-slider)
 
                                   (d-color-fill)
-
-                                  (d-thickness-label)
-                                  (d-thickness-slider)
 
                                   (d-OK-btn)
 

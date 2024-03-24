@@ -192,13 +192,22 @@ CodepointToUTF8(int cp, int *sz)
     cpu8ret = malloc(4);
     memset(cpu8ret, 0, 4);
   }
+  cpu8ret[0] = cpressed;
+  *sz = 1;
   return cpu8ret;
 }
 
 int
 GetKeyPressed(void)
 {
-  return cpressed;
+  switch (cpressed) {
+  case 8: return 259;
+  case '\n': return 257;
+  case 61457: return 263;
+  case 61458: return 262;
+  case 27: return 256;
+  default: return cpressed;
+  }
 }
 
 bool lbtn_p, rbtn_p;

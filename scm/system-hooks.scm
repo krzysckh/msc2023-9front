@@ -1,3 +1,7 @@
+;;--- system-hooks.scm
+;; ten plik definiuje hooki "systemowe", t.j. odpowiedzialne za menu, gui, etc
+
+
 ; TODO: HACK: to powinna byc funkcja pytajaca typu (can-handle-click?)
 ; i ogolnie user-hooki zalezne od tego i system-hooki niezalezne
 (define *current-mode* nil)
@@ -171,31 +175,36 @@
                     (set! sel-mode:should-end-selected-mode #t))))))
 
 (define (option-menu-for-source ids)
-  `(("zmień kąt" . ,(→ (gui/mp-slider+ok
-                        0 359
-                        (lambda (v)
-                          (map (→1 (set-source-e! x 'mouse-reactive #f)
-                                   (set-source-e! x 'angle v))
-                               ids))
-                        0)))
-    ("zmień kolor" . ,(→ (gui/change-source-color-form
-                          (get-mouse-position)
-                          (lambda (v) (map (→1 (set-source-e! x 'color v)) ids)))))
-    ("'mouse-reactive" . ,(→ (map (→1 (set-source-e! x 'mouse-reactive (not (list-ref (list-ref *sources* x) 3)))) ids)))
-    ("zmień ilość wiązek" . ,(→ (gui/mp-slider+ok
-                                 0 *source-size*
-                                 (lambda (v) (map (→1 (set-source-e! x 'n-beams v)) ids))
-                                 0)))
-    ("zmień szerokość wiązki" . ,(→ (gui/mp-slider+ok
-                                 1 10
-                                 (lambda (v) (map (→1 (set-source-e! x 'thickness v)) ids))
-                                 0)))
-    ("kopiuj" . ,(→ (set!
-                     *clipboard*
-                     (map (→1 (serialize:source->sexp (list-ref *sources* x))) ids))))
-    ("usuń" . ,(→ (delete-sources ids)
-                  (when (eqv? *current-mode* 'selected)
-                    (set! sel-mode:should-end-selected-mode #t))))))
+  (append
+   `(("zmień kąt" . ,(→ (gui/mp-slider+ok
+                         0 359
+                         (lambda (v)
+                           (map (→1 (set-source-e! x 'mouse-reactive #f)
+                                    (set-source-e! x 'angle v))
+                                ids))
+                         0)))
+     ("zmień kolor" . ,(→ (gui/change-source-color-form
+                           (get-mouse-position)
+                           (lambda (v) (map (→1 (set-source-e! x 'color v)) ids)))))
+     ("'mouse-reactive" . ,(→ (map (→1 (set-source-e! x 'mouse-reactive (not (list-ref (list-ref *sources* x) 3)))) ids))))
+   (if (all (→1 (white? (list-ref (list-ref *sources* x) 5))) ids)
+       `(("zmień szerokość wiązki" . ,(→ (gui/mp-slider+ok
+                                          1 10
+                                          (lambda (v) (map (→1 (set-source-e! x 'n-beams v)) ids))
+                                          0))))
+       '())
+   (if (all (→1 (not (white? (list-ref (list-ref *sources* x) 5)))) ids)
+       `(("zmień ilość wiązek" . ,(→ (gui/mp-slider+ok
+                          0 *source-size*
+                          (lambda (v) (map (→1 (set-source-e! x 'n-beams v)) ids))
+                          0))))
+       '())
+   `(("kopiuj" . ,(→ (set!
+                      *clipboard*
+                      (map (→1 (serialize:source->sexp (list-ref *sources* x))) ids))))
+     ("usuń" . ,(→ (delete-sources ids)
+                   (when (eqv? *current-mode* 'selected)
+                     (set! sel-mode:should-end-selected-mode #t)))))))
 
 (define (option-menu-for T id-or-ids)
   (let ((ids (if (list? id-or-ids) id-or-ids (list id-or-ids))))
@@ -442,7 +451,7 @@
 ;; hooki wykonywane z argumentami 'TYP ..dane
 ;; jako że toplisty nazywają się *TYPs*, dodaję po prostu do typu gwiazdki po obu stronach i -s na koniec
 ;; i mam nazwę zmiennej
-;; z tąd właśnie (string->symbol (string-append "*" (symbol->string x) "s*"))
+;; stąd właśnie (string->symbol (string-append "*" (symbol->string x) "s*"))
 ;; XDDD
 ;; ~ kpm
 

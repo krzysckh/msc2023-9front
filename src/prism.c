@@ -25,58 +25,56 @@ typedef struct {
   Color c;
 } len2color_t;
 
-static int len2color_vs_n;
-static len2color_t len2color_vs[1024];
-
 // https://www.partow.net/miscellaneous/colours.html
-void init_len2color_vs(void)
+static len2color_t len2color_vs[44];
+static int len2color_vs_n = 44;
+
+static void init_len2color_vs(void)
 {
-  int i = 0;
-  len2color_vs[i++] = (len2color_t){ 700.000, (Color){255, 000, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 640.427, (Color){255, 031, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 633.790, (Color){255, 063, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 626.205, (Color){255,  95, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 617.938, (Color){255, 127, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 609.126, (Color){255, 159, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 599.855, (Color){255, 191, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 590.184, (Color){255, 223, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 580.159, (Color){255, 255, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 569.363, (Color){223, 255, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 558.936, (Color){191, 255, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 548.938, (Color){159, 255, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 539.431, (Color){127, 255, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 530.508, (Color){ 95, 255, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 522.313, (Color){063, 255, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 515.126, (Color){031, 255, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 510.028, (Color){000, 255, 000, 255} };
-  len2color_vs[i++] = (len2color_t){ 508.593, (Color){000, 255, 031, 255} };
-  len2color_vs[i++] = (len2color_t){ 506.550, (Color){000, 255, 063, 255} };
-  len2color_vs[i++] = (len2color_t){ 504.217, (Color){000, 255,  95, 255} };
-  len2color_vs[i++] = (len2color_t){ 501.673, (Color){000, 255, 127, 255} };
-  len2color_vs[i++] = (len2color_t){ 498.961, (Color){000, 255, 159, 255} };
-  len2color_vs[i++] = (len2color_t){ 496.109, (Color){000, 255, 191, 255} };
-  len2color_vs[i++] = (len2color_t){ 493.133, (Color){000, 255, 223, 255} };
-  len2color_vs[i++] = (len2color_t){ 490.049, (Color){000, 255, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 482.402, (Color){000, 223, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 474.954, (Color){000, 191, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 467.812, (Color){000, 159, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 461.022, (Color){000, 127, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 454.648, (Color){000,  95, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 448.795, (Color){000, 063, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 443.661, (Color){000, 031, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 440.020, (Color){000, 000, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 435.779, (Color){031, 000, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 429.652, (Color){063, 000, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 422.651, (Color){ 95, 000, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 417.397, (Color){127, 000, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 414.553, (Color){159, 000, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 412.223, (Color){191, 000, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 410.835, (Color){223, 000, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 409.196, (Color){255, 000, 255, 255} };
-  len2color_vs[i++] = (len2color_t){ 405.659, (Color){255, 000, 223, 255} };
-  len2color_vs[i++] = (len2color_t){ 402.805, (Color){255, 000, 191, 255} };
-  len2color_vs[i++] = (len2color_t){ 397.406, (Color){255, 000, 159, 255} };
-  len2color_vs_n = i;
+  len2color_vs[0] = (len2color_t) { 700.000, (Color){255, 000, 000, 255} };
+  len2color_vs[1] = (len2color_t) { 640.427, (Color){255, 031, 000, 255} };
+  len2color_vs[2] = (len2color_t) { 633.790, (Color){255, 063, 000, 255} };
+  len2color_vs[3] = (len2color_t) { 626.205, (Color){255,  95, 000, 255} };
+  len2color_vs[4] = (len2color_t) { 617.938, (Color){255, 127, 000, 255} };
+  len2color_vs[5] = (len2color_t) { 609.126, (Color){255, 159, 000, 255} };
+  len2color_vs[6] = (len2color_t) { 599.855, (Color){255, 191, 000, 255} };
+  len2color_vs[7] = (len2color_t) { 590.184, (Color){255, 223, 000, 255} };
+  len2color_vs[8] = (len2color_t) { 580.159, (Color){255, 255, 000, 255} };
+  len2color_vs[9] = (len2color_t) { 569.363, (Color){223, 255, 000, 255} };
+  len2color_vs[10] = (len2color_t) { 558.936, (Color){191, 255, 000, 255} };
+  len2color_vs[11] = (len2color_t) { 548.938, (Color){159, 255, 000, 255} };
+  len2color_vs[12] = (len2color_t) { 539.431, (Color){127, 255, 000, 255} };
+  len2color_vs[13] = (len2color_t) { 530.508, (Color){ 95, 255, 000, 255} };
+  len2color_vs[14] = (len2color_t) { 522.313, (Color){063, 255, 000, 255} };
+  len2color_vs[15] = (len2color_t) { 515.126, (Color){031, 255, 000, 255} };
+  len2color_vs[16] = (len2color_t) { 510.028, (Color){000, 255, 000, 255} };
+  len2color_vs[17] = (len2color_t) { 508.593, (Color){000, 255, 031, 255} };
+  len2color_vs[18] = (len2color_t) { 506.550, (Color){000, 255, 063, 255} };
+  len2color_vs[19] = (len2color_t) { 504.217, (Color){000, 255,  95, 255} };
+  len2color_vs[20] = (len2color_t) { 501.673, (Color){000, 255, 127, 255} };
+  len2color_vs[21] = (len2color_t) { 498.961, (Color){000, 255, 159, 255} };
+  len2color_vs[22] = (len2color_t) { 496.109, (Color){000, 255, 191, 255} };
+  len2color_vs[23] = (len2color_t) { 493.133, (Color){000, 255, 223, 255} };
+  len2color_vs[24] = (len2color_t) { 490.049, (Color){000, 255, 255, 255} };
+  len2color_vs[25] = (len2color_t) { 482.402, (Color){000, 223, 255, 255} };
+  len2color_vs[26] = (len2color_t) { 474.954, (Color){000, 191, 255, 255} };
+  len2color_vs[27] = (len2color_t) { 467.812, (Color){000, 159, 255, 255} };
+  len2color_vs[28] = (len2color_t) { 461.022, (Color){000, 127, 255, 255} };
+  len2color_vs[29] = (len2color_t) { 454.648, (Color){000,  95, 255, 255} };
+  len2color_vs[30] = (len2color_t) { 448.795, (Color){000, 063, 255, 255} };
+  len2color_vs[31] = (len2color_t) { 443.661, (Color){000, 031, 255, 255} };
+  len2color_vs[32] = (len2color_t) { 440.020, (Color){000, 000, 255, 255} };
+  len2color_vs[33] = (len2color_t) { 435.779, (Color){031, 000, 255, 255} };
+  len2color_vs[34] = (len2color_t) { 429.652, (Color){063, 000, 255, 255} };
+  len2color_vs[35] = (len2color_t) { 422.651, (Color){ 95, 000, 255, 255} };
+  len2color_vs[36] = (len2color_t) { 417.397, (Color){127, 000, 255, 255} };
+  len2color_vs[37] = (len2color_t) { 414.553, (Color){159, 000, 255, 255} };
+  len2color_vs[38] = (len2color_t) { 412.223, (Color){191, 000, 255, 255} };
+  len2color_vs[39] = (len2color_t) { 410.835, (Color){223, 000, 255, 255} };
+  len2color_vs[40] = (len2color_t) { 409.196, (Color){255, 000, 255, 255} };
+  len2color_vs[41] = (len2color_t) { 405.659, (Color){255, 000, 223, 255} };
+  len2color_vs[42] = (len2color_t) { 402.805, (Color){255, 000, 191, 255} };
+  len2color_vs[43] = (len2color_t) { 397.406, (Color){255, 000, 159, 255} };
 }
 
 // https://en.wikipedia.org/wiki/Type_punning
@@ -163,25 +161,31 @@ typedef struct {
 static source_t prism_mk_source(void)
 {
   source_t s;
-  s.angle = 0, s.mouse_reactive = false, s.n_beam = 1, s.size = 1, s.thickness = 1;
+  s.angle = 0,
+  s.mouse_reactive = false,
+  s.n_beam = 1,
+  s.size = 1,
+  s.thickness = 1;
 
   return s;
 }
 
-// stworzy src->thickness kolorowych świateł
+// stworzy src->thickness
+// tylko gdy is_white(src->color)
 static void prism_cast_colors(Vector2 prev, float first_ang, float fin_ang, source_t *src, prism_data_t *pd)
 {
   int n = MAX(3, src->thickness);
   int i, step = (700 - 390) / n;
   Color cur_color;
-  int dist = floor((2+src->thickness) / (1.f+(float)src->thickness));
+  /* int dist = floor(src->thickness / 2.f); */
+  int dist = floor(src->thickness / (float)n);
   float darken_by = 255.f - (src->color.r + src->color.g + src->color.b)/3.f;
 
   for (i = 0; i < n; ++i) {
     cur_color = wavelen2rgb(390 + i*step);
     source_t s = prism_mk_source();
 
-    int sz = (((float)src->thickness/2)-((i+1)*dist))/sqrt(2);
+    int sz = (((float)src->thickness/2)-((i-2)*dist))/sqrt(2);
     Vector2 rot = Vector2Rotate(vec(sz, sz), (-45 - 90 + first_ang) * PI/180);
     Vector2 pt = vec(prev.x + rot.x, prev.y + rot.y);
     Vector2 targ = create_target(pt, first_ang);
@@ -189,8 +193,6 @@ static void prism_cast_colors(Vector2 prev, float first_ang, float fin_ang, sour
     targ = vec(targ.x - (prev.x - pt.x), targ.y - (prev.y - pt.y));
 
     Vector2 next = pt;
-
-    /* DrawCircleV(pt, 1, PINK); */
 
     int max_iter = 128;
     while (!CheckCollisionPointTriangle(next, pd->p1, pd->p2, pd->p3) && max_iter) {
@@ -214,7 +216,7 @@ static void prism_cast_colors(Vector2 prev, float first_ang, float fin_ang, sour
 
     s.pt = next;
     s.color = cur_color;
-    s.thickness = 2;
+    s.thickness = 1;
     s.target = create_target(next, fin_ang + i*0.2);
 
 #ifdef DRAW_LINES_INSIDE
@@ -306,8 +308,9 @@ Vector2 prism_create_target(bounceable_t *b, Vector2 cur, Vector2 next, struct _
 #define φ 60
 void add_prism(Vector2 center, int vert_len, float n)
 {
-  init_len2color_vs();
   prism_data_t *pd = malloc(sizeof(prism_data_t));
+
+  init_len2color_vs();
 
   pd->center = center;
   pd->vert_len = vert_len;

@@ -21,19 +21,19 @@
 (define-example "źródło i pryzmaty"
   (→ (create-prism '(305 . 326) 100.0 1.309999943)
      (create-prism '(552 . 364) 203.0 1.7)
-     (create-source '((pos 88 . 359) (angle . 353) (thickness . 7) (reactive . #f) (n-beams . 1) (color 255 255 255 255)))))
+     (create-source '((pos 88 . 359) (angle . 353) (n-beams . 7) (reactive . #f) (n-beams . 1) (color 255 255 255 255)))))
 
 (define-example "źródło światła białego i pryzmat"
   (→ (create-source `((pos . (150 . 370))
                       (reactive . #f)
                       (angle . 340)
-                      (thickness . 10)
+                      (n-beams . 10)
                       (color . ,white)))
      (create-prism '(400 . 320) 120 1.31)))
 
 (define-example "laser i soczewka"
   (→ (create-lens '(413 . 282) 20.0 163.1666718)
-     (create-source '((pos 45 . 283) (angle . 0) (thickness . 1) (reactive . #f) (n-beams . 19) (color 255 0 0)))))
+     (create-source '((pos 45 . 283) (angle . 0) (reactive . #f) (n-beams . 19) (color 255 0 0)))))
 
 (define-example "pełzające źródło"
   (→ (let* ((pos '(100 . 0))
@@ -42,7 +42,7 @@
                         `((pos . ,pos)
                           (angle . ,ang)
                           (color . ,white)
-                          (thickness . 8)
+                          (n-beams . 8)
                           (reactive . #f)))))
             (sz (get-screen-size))
             (step-size (/ 45.0 (cdr sz)))

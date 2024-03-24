@@ -113,6 +113,9 @@
      (sym . "'pos | 'angle | 'thickness | 'color | 'mouse-reactive | 'n-beams w zależności od tego co chcemy zmienić")
      (v . "nowa wartość dla sym")))
 
+  (when (eqv? sym 'thickness)
+    (print "setting thickness to" v))
+
   (if (> n (length *sources*))
     #f
     (let* ((src (get-source n))

@@ -4,18 +4,12 @@
 #include "tinyscheme/scheme-private.h"
 #include "tinyscheme/scheme.h"
 
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
-
-#ifndef PLAN9
-#include <unistd.h>
-#endif
-
-#ifdef PLAN9
-#include "9.h"
-#endif
 
 /* funkcje zdefiniowane tutaj udokumentowane są w scm/cdocs.scm */
 
@@ -109,13 +103,12 @@ static Color list2color(scheme *sc, pointer p)
   // ty debilu nie podales koloru duze elo
   // ~ kpm
 
-  Color c;
-  c.r = rvalue(car(p)),
-  c.g = rvalue(cadr(p)),
-  c.b = rvalue(caddr(p)),
-  c.a = cadddr(p) == sc->NIL ? 255 : rvalue(cadddr(p));
-
-  return c;
+  return (Color) {
+    floor(rvalue(car(p))),
+    floor(rvalue(cadr(p))),
+    floor(rvalue(caddr(p))),
+    floor(cadddr(p) == sc->NIL ? 255 : rvalue(cadddr(p)))
+  };
 }
 
 void update_screen_size_variables(void)
@@ -288,8 +281,8 @@ static pointer scm_point_in_lens(scheme *sc, pointer args)
 // typem jakies idk gowno_dupa_t, i mieć do wszystkiego takie same hooki, a teraz jak jest tak
 // porozrzucane jak gnoj po polu to juz za pozno zeby naprawiac no bez jaj szkoda troche
 //
-// dlatego też NIE DODAM (delete-source) tutaj, tylko idk może kiedyś w scheme.
-// teraz przyda mi się tylko usuwanie wszystkich, więc tylko to zeobie
+// dlatego też NIE DODAM (delete-source) tutaj, tylko idk może kiedyś w scheme. (update: dodałem)
+// teraz przyda mi się tylko usuwanie wszystkich, więc tylko to zrobie
 // nie miałoby to sensu, bo nie ma żadnych hooków, które działałyby po usunięciu źródła,
 // a dodawanie ich tylko pokomplikowałoby wszystko
 // aaaa szkoda gadać,... szkoda strzępić ryjec
@@ -301,7 +294,9 @@ static pointer scm_delete_all_sources(scheme *sc, pointer args)
   expect_args("delete-all-sources", 0);
 
   free(sources.v);
-  sources = (Sources){0, 0, 0};
+  sources.n = 0;
+  sources.v = 0;
+  sources.size = 0;
   return sc->T;
 }
 
@@ -661,6 +656,7 @@ static pointer scm_get_winconf(scheme *sc, pointer args)
                         Cons(color2list(sc, winconf.prism_outline_color), sc->NIL))));
 }
 
+void new_bgcolor(Color c);
 // (set-winconf bgcolor mirror-color state prism-outline-color) + wiecej w przyszlosci
 static pointer scm_set_winconf(scheme *sc, pointer args)
 {
@@ -673,10 +669,10 @@ static pointer scm_set_winconf(scheme *sc, pointer args)
   state   = rvalue(caddr(args));
   prismc  = list2color(sc, cadddr(args));
 
-  winconf.bgcolor = bg;
   winconf.mirror_color = mirrorc;
   winconf.state = state;
   winconf.prism_outline_color = prismc;
+  winconf.bgcolor = bg;
 
   return sc->NIL;
 }
@@ -725,11 +721,14 @@ static pointer scm_time_since_init(scheme *sc, pointer args)
 #define BUF_STEP 512
 static pointer scm_system(scheme *sc, pointer args)
 {
-#ifndef PLAN9
   int bufsiz = 0, n;
   char *buf = NULL, *command;
   FILE *f;
 
+  TraceLog(LOG_ERROR, "(system) not available");
+  return sc->F;
+
+/*
   expect_args("system", 1);
   command = string_value(car(args));
 
@@ -743,9 +742,7 @@ static pointer scm_system(scheme *sc, pointer args)
   pclose(f);
 
   return mk_string(sc, buf);
-#else
-  return sc->NIL;
-#endif
+*/
 }
 #undef BUF_STEP
 
@@ -761,8 +758,7 @@ __attribute__((noreturn)) static pointer scm_exit(scheme *sc, pointer args)
   TraceLog(LOG_INFO, "exiting with status %d from scheme script.", status);
 
   exit(status);
-
-  return sc->NIL;
+  return sc->F;
 }
 
 // (loads s) → nil
@@ -1062,7 +1058,7 @@ static pointer scm_get_bounceable(scheme *sc, pointer args)
     } break;
     default: {
       abort();
-      warnx("%s: %d not implemented for get-bounceable", "", cur->t);
+      warnx("%s: %d not implemented for get-bounceable", __func__, cur->t);
     }
     }
   } else {
@@ -1207,8 +1203,13 @@ static pointer scm_create_source(scheme *sc, pointer args)
   color = list2color(sc, cadddr(cddddr(args)));
 
   source_t s;
-  s.mouse_reactive = rel, s.size = sz, s.pt = (Vector2){x, y}, s.thickness = thickness,
-  s.angle = angle, s.color = color, s.n_beam = n_beams;
+  s.mouse_reactive = rel,
+  s.size = sz,
+  s.pt = (Vector2){x, y},
+  s.thickness = thickness,
+  s.angle = angle,
+  s.color = color,
+  s.n_beam = n_beams;
   add_source(s);
 
   return MKI(sources.n-1);

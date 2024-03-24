@@ -1,7 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
 /* #include <raygui.h> */
-#include <stdint.h>
 #include <stdbool.h>
 
 #ifndef WIN32
@@ -19,6 +18,10 @@
 #define MAX(x,y) (((x)>(y))?(x):(y))
 #define MIN(x,y) (((x)<(y))?(x):(y))
 #define MAX_FONT_SIZE 1024
+
+#ifndef __has_attribute
+#define __attribute__(x)
+#endif
 
 #define vec(a,b) ((Vector2){(a),(b)})
 
@@ -68,9 +71,7 @@
 #endif
 
 #define vecwarnx(v) warnx("%s.x: %f, %s.y: %f", #v, (v).x, #v, (v).y)
-
 #define assert(x) if (!(x)) { assert_fn("assertion failed: " #x); }
-
 #define TODO(s) panic("TODO: %s", s)
 
 typedef enum {
@@ -248,6 +249,3 @@ void add_source(source_t s);
 
 // win-icon.c
 void w32_load_icon(void);
-
-
-uint32_t color2color(Color);
